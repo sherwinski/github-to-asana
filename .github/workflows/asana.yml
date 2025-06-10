@@ -4,13 +4,12 @@ on:
   issues:
     types: [opened]
 
-  permissions:
-    issues: read
-
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+    steps:
         - name: Create Asana ticket
           env:
             ISSUE_TITLE: ${{ github.event.issue.title }}
