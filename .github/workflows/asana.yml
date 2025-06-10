@@ -1,0 +1,50 @@
+name: Github / Asana Workflow
+
+on:
+  issues:
+    types: [opened]
+
+  permissions:
+    issues: read
+
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Create Asana ticket
+          env:
+            ISSUE_TITLE: ${{ github.event.issue.title }}
+            ISSUE_BODY: ${{ github.event.issue.body }}
+            ISSUE_HTML_URL: ${{ github.event.issue.html_url }}
+            ISSUE_ID: ${{ github.event.issue.id }}
+            ISSUE_NUMBER: ${{ github.event.issue.number }}
+          run: |
+            curl --request POST \
+                 --url 'https://app.asana.com/api/1.0/tasks?opt_pretty=true' \
+                 --header 'accept: application/json' \
+                 --header 'content-type: application/json' \
+                 --data '
+            {
+              "data": {
+                "custom_fields": {
+                  "DSA Repo Ticket Url": "$ISSUE_HTML_URL",
+                  "SDK Platform Group": "Mobile",
+                  "SDK Platform": "iOS",
+                  "DSA Priority": "--- No Priority",
+                  "DSA Status": "Triage"
+                },
+                "name": "$ISSUE_TITLE",
+                "workspace": "780103692902078",
+                "projects": [
+                  "1208970714650308",
+                  "1208777198342772"
+                ],
+                "notes": "Issue ID: $ISSUE_ID
+                Issue number: $ISSUE_NUMBER
+                Sync method: Custom Action
+
+                ----
+
+                $ISSUE_BODY"
+              }
+            }'          
