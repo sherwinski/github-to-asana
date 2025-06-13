@@ -3,6 +3,7 @@ name: Github / Asana Workflow
 on:
   issues:
     types: [opened]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,28 +23,29 @@ jobs:
                  --url 'https://app.asana.com/api/1.0/tasks?opt_pretty=true' \
                  --header 'accept: application/json' \
                  --header 'content-type: application/json' \
+                 --header 'Authorization: Bearer ${{ secrets.ASANA_PAT }}' \
                  --data '
             {
               "data": {
                 "custom_fields": {
-                  "DSA Repo Ticket Url": "$ISSUE_HTML_URL",
-                  "SDK Platform Group": "Mobile",
-                  "SDK Platform": "iOS",
-                  "DSA Priority": "--- No Priority",
-                  "DSA Status": "Triage"
+                    "1208961704779581": "1208961704779582",
+                    "1208961704779592": "1208961704779596",
+                    "1208779519954980": "1208779521616959",
+                    "1210103546117753": "1210103546117756",
+                    "1210347857768758": $ISSUE_HTML_URL
                 },
                 "name": "$ISSUE_TITLE",
                 "workspace": "780103692902078",
                 "projects": [
                   "1208970714650308",
-                  "1208777198342772"
                 ],
                 "notes": "Issue ID: $ISSUE_ID
                 Issue number: $ISSUE_NUMBER
-                Sync method: Custom Action
 
                 ----
 
-                $ISSUE_BODY"
+                $ISSUE_BODY
+
+                via GitHub Actions"
               }
             }'          
