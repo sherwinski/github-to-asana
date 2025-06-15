@@ -11,7 +11,7 @@ jobs:
     permissions:
       issues: read
     steps:
-        - name: Create Asana ticket
+        - name: Create Asana task
           env:
             ISSUE_TITLE: ${{ github.event.issue.title }}
             ISSUE_BODY: ${{ github.event.issue.body }}
@@ -37,7 +37,6 @@ jobs:
                   "name": $title,
                   "workspace": "780103692902078",
                   "projects": ["1208970714650308"],
-                  "assignee_section": "1208970755434051",
                   "notes": "Issue ID: \($id)\nIssue number: \($number)\nCreated via GitHub Actions\n----\n\n\($body)"
                 }
               }')
@@ -47,4 +46,23 @@ jobs:
                  --header 'accept: application/json' \
                  --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
                  --header 'content-type: application/json' \
-                 --data "$JSON_BODY"
+                 --data "$JSON_BODY" \
+                 --output response.json
+
+            TASK_GID=$(jq -r '.data.gid' response.json)
+            echo "TASK_GID=$TASK_GID" >> $GITHUB_ENV
+        - name: Move task to top of section
+          run: |
+              curl --request POST \
+              --url https://app.asana.com/api/1.0/sections/1208970755434051/addTask \
+              --header 'accept: application/json' \
+              --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
+              --header 'content-type: application/json' \
+              --data '
+              {
+                "data": {
+                  "task": "$TASK_GID",
+                  "insert_after": "null"
+                }
+              }
+              '
