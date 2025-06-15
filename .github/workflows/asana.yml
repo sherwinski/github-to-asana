@@ -37,7 +37,7 @@ jobs:
                   "name": $title,
                   "workspace": "780103692902078",
                   "projects": ["1208970714650308"],
-                  "assignee_section": "1208970755434051"
+                  "assignee_section": "1208970755434051",
                   "notes": "Issue ID: \($id)\nIssue number: \($number)\nCreated via GitHub Actions\n----\n\n\($body)"
                 }
               }')
