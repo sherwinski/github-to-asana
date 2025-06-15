@@ -36,7 +36,7 @@ jobs:
                   },
                   "name": $title,
                   "workspace": "780103692902078",
-                  "projects": ["1208970714650308"],
+                  "projects": ["1208970714650308", "1208777198342772"],
                   "notes": "Issue ID: \($id)\nIssue number: \($number)\nCreated via GitHub Actions\n----\n\n\($body)"
                 }
               }')
@@ -51,7 +51,7 @@ jobs:
 
             TASK_GID=$(jq -r '.data.gid' response.json)
             echo "TASK_GID=$TASK_GID" >> $GITHUB_ENV
-        - name: Move task to top of section
+        - name: Move to "0 Unclassified" section in "Github & Important SDK Issues" project
           run: |
               DATA_BODY=$(jq -n \
                 --arg task_gid "$TASK_GID" \
@@ -64,6 +64,23 @@ jobs:
 
               curl --request POST \
               --url https://app.asana.com/api/1.0/sections/1208970755434051/addTask \
+              --header 'accept: application/json' \
+              --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
+              --header 'content-type: application/json' \
+              --data "$DATA_BODY"
+        - name: Move to "Untriaged" section in "SDK / Backlog" project
+          run: |
+              DATA_BODY=$(jq -n \
+                --arg task_gid "$TASK_GID" \
+                '{
+                  "data": {
+                    "task": $task_gid,
+                    "insert_after": "null"
+                  }
+                }')
+
+              curl --request POST \
+              --url https://app.asana.com/api/1.0/sections/1208899729378982/addTask \
               --header 'accept: application/json' \
               --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
               --header 'content-type: application/json' \
