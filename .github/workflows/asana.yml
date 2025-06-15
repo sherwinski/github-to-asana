@@ -19,8 +19,7 @@ jobs:
             ISSUE_ID: ${{ github.event.issue.id }}
             ISSUE_NUMBER: ${{ github.event.issue.number }}
           run: |
-            # Create JSON payload using jq
-            JSON_PAYLOAD=$(jq -n \
+            JSON_BODY=$(jq -n \
               --arg title "$ISSUE_TITLE" \
               --arg body "$ISSUE_BODY" \
               --arg url "$ISSUE_HTML_URL" \
@@ -38,14 +37,14 @@ jobs:
                   "name": $title,
                   "workspace": "780103692902078",
                   "projects": ["1208970714650308"],
-                  "notes": "Issue ID: \($id)\nIssue number: \($number)\n\n----\n\n\($body)\n\nvia GitHub Actions"
+                  "assignee_section": "1208970755434051"
+                  "notes": "Issue ID: \($id)\nIssue number: \($number)\nCreated via GitHub Actions\n----\n\n\($body)"
                 }
               }')
 
-            # Make the API call
             curl --request POST \
                  --url https://app.asana.com/api/1.0/tasks?opt_pretty=true \
                  --header 'accept: application/json' \
                  --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
                  --header 'content-type: application/json' \
-                 --data "$JSON_PAYLOAD"
+                 --data "$JSON_BODY"
