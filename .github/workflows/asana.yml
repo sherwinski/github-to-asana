@@ -19,27 +19,33 @@ jobs:
             ISSUE_ID: ${{ github.event.issue.id }}
             ISSUE_NUMBER: ${{ github.event.issue.number }}
           run: |
-            curl --request POST \
-            --url https://app.asana.com/api/1.0/tasks?opt_pretty=true \
-            --header 'accept: application/json' \
-            --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
-            --header 'content-type: application/json' \
-            --data '
-              {
+            # Create JSON payload using jq
+            JSON_PAYLOAD=$(jq -n \
+              --arg title "$ISSUE_TITLE" \
+              --arg body "$ISSUE_BODY" \
+              --arg url "$ISSUE_HTML_URL" \
+              --arg id "$ISSUE_ID" \
+              --arg number "$ISSUE_NUMBER" \
+              '{
                 "data": {
                   "custom_fields": {
                     "1208961704779581": "1208961704779582",
                     "1208961704779592": "1208961704779596",
                     "1208779519954980": "1208779521616959",
                     "1210103546117753": "1210103546117756",
-                    "1210347857768758": "'$ISSUE_HTML_URL'"
+                    "1210347857768758": $url
                   },
+                  "name": $title,
                   "workspace": "780103692902078",
-                  "name": "'$ISSUE_TITLE'",
-                  "projects": [
-                    "1208970714650308"
-                  ],
-                  "notes": "Issue ID: '$ISSUE_ID'\nIssue number: '$ISSUE_NUMBER'\n\n----\n\n'$ISSUE_BODY'\n\nvia GitHub Actions"
+                  "projects": ["1208970714650308"],
+                  "notes": "Issue ID: \($id)\nIssue number: \($number)\n\n----\n\n\($body)\n\nvia GitHub Actions"
                 }
-              }
-              '
+              }')
+
+            # Make the API call
+            curl --request POST \
+                 --url https://app.asana.com/api/1.0/tasks?opt_pretty=true \
+                 --header 'accept: application/json' \
+                 --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
+                 --header 'content-type: application/json' \
+                 --data "$JSON_PAYLOAD"
