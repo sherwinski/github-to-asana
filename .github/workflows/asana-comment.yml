@@ -25,7 +25,7 @@ jobs:
         - name: Comment on Asana Task
           env:
             ISSUE_COMMENT: ${{ github.event.comment.body }}
-            COMMENTER_NAME: ${{ github.event.comment.user.name }}
+            COMMENTER_NAME: ${{ github.event.comment.user.login }}
           run: |
             BODY_DATA=$(jq -n \
               --arg text "$ISSUE_COMMENT" \
