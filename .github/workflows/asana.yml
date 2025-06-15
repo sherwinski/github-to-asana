@@ -19,7 +19,7 @@ jobs:
             ISSUE_ID: ${{ github.event.issue.id }}
             ISSUE_NUMBER: ${{ github.event.issue.number }}
           run: |
-            JSON_BODY=$(jq -n \
+            DATA_BODY=$(jq -n \
               --arg title "$ISSUE_TITLE" \
               --arg body "$ISSUE_BODY" \
               --arg url "$ISSUE_HTML_URL" \
@@ -46,23 +46,25 @@ jobs:
                  --header 'accept: application/json' \
                  --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
                  --header 'content-type: application/json' \
-                 --data "$JSON_BODY" \
+                 --data "$DATA_BODY" \
                  --output response.json
 
             TASK_GID=$(jq -r '.data.gid' response.json)
             echo "TASK_GID=$TASK_GID" >> $GITHUB_ENV
         - name: Move task to top of section
           run: |
+              $DATA_BODY=$(jq -n \
+                --arg task_gid "$TASK_GID" \
+                '{
+                  "data": {
+                    "task": $task_gid,
+                    "insert_after": "null"
+                  }
+                }')
+
               curl --request POST \
               --url https://app.asana.com/api/1.0/sections/1208970755434051/addTask \
               --header 'accept: application/json' \
               --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
               --header 'content-type: application/json' \
-              --data '
-              {
-                "data": {
-                  "task": "$TASK_GID",
-                  "insert_after": "null"
-                }
-              }
-              '
+              --data "$DATA_BODY"
