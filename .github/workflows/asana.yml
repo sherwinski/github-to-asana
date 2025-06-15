@@ -53,7 +53,7 @@ jobs:
             echo "TASK_GID=$TASK_GID" >> $GITHUB_ENV
         - name: Move task to top of section
           run: |
-              $DATA_BODY=$(jq -n \
+              DATA_BODY=$(jq -n \
                 --arg task_gid "$TASK_GID" \
                 '{
                   "data": {
