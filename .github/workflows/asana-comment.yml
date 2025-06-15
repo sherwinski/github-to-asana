@@ -16,13 +16,12 @@ jobs:
             ISSUE_ID: ${{ github.event.issue.id }}
           run: |
             curl --request GET \
-                 --url "https://app.asana.com/api/1.0/workspaces/780103692902078/tasks/search?opt_fields=notes,custom_fields.text_value&text=$ISSUE_ID&sort_by=modified_at&sort_ascending=false" \
+                 --url "https://app.asana.com/api/1.0/workspaces/780103692902078/tasks/search?opt_fields=notes&text=$ISSUE_ID&sort_by=modified_at&sort_ascending=false" \
                  --header 'accept: application/json' \
                  --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
                  --output response.json
-            TASK_GID=$(jq -r '.data.gid' response.json)
+            TASK_GID=$(jq -r '.data[0].gid' response.json)
             echo "TASK_GID=$TASK_GID" >> $GITHUB_ENV
-
         - name: Comment on Asana Task
           env:
             ISSUE_COMMENT: ${{ github.event.comment.body }}
