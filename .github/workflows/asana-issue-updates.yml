@@ -138,20 +138,16 @@ jobs:
               
               # Add issue state information for state changes
               if [ "$ACTION_TYPE" = "closed" ] || [ "$ACTION_TYPE" = "reopened" ]; then
-                MESSAGE_TEXT="$MESSAGE_TEXT
-Issue state: $ISSUE_STATE"
+                MESSAGE_TEXT=$(printf "%s\nIssue state: %s" "$MESSAGE_TEXT" "$ISSUE_STATE")
               fi
               
               # Add repository information for transferred issues
               if [ "$ACTION_TYPE" = "transferred" ]; then
                 REPO_NAME="${{ github.event.repository.full_name }}"
-                MESSAGE_TEXT="$MESSAGE_TEXT
-From repository: $REPO_NAME"
+                MESSAGE_TEXT=$(printf "%s\nFrom repository: %s" "$MESSAGE_TEXT" "$REPO_NAME")
               fi
               
-              MESSAGE_TEXT="$MESSAGE_TEXT
-
-Issue: #$ISSUE_NUMBER - $ISSUE_TITLE"
+              MESSAGE_TEXT=$(printf "%s\n\nIssue: #%s - %s" "$MESSAGE_TEXT" "$ISSUE_NUMBER" "$ISSUE_TITLE")
 
               BODY_DATA=$(jq -n \
                 --arg text "$MESSAGE_TEXT" \
