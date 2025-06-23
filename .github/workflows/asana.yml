@@ -38,21 +38,29 @@ jobs:
               --arg id "$ISSUE_ID" \
               --arg number "$ISSUE_NUMBER" \
               --arg sdk_platform_group "$SDK_PLATFORM_GROUP" \
+              --arg sdk_platform_group_mobile "$SDK_PLATFORM_GROUP_MOBILE" \
               --arg sdk_platform "$SDK_PLATFORM" \
+              --arg sdk_platform_ios "$SDK_PLATFORM_IOS" \
               --arg dsa_priority "$DSA_PRIORITY" \
+              --arg dsa_priority_no_priority "$DSA_PRIORITY_NO_PRIORITY" \
               --arg dsa_status "$DSA_STATUS" \
+              --arg dsa_status_triage "$DSA_STATUS_TRIAGE" \
+              --arg dsa_repo_ticket_url "$DSA_REPO_TICKET_URL" \
+              --arg workspace_id "$WORKSPACE_ID" \
+              --arg project_id_github_and_important_sdk_issues "$PROJECT_ID_GITHUB_AND_IMPORTANT_SDK_ISSUES" \
+              --arg project_id_sdk_backlog "$PROJECT_ID_SDK_BACKLOG" \
               '{
                 "data": {
                   "custom_fields": {
-                    $SDK_PLATFORM_GROUP: $SDK_PLATFORM_GROUP_MOBILE,
-                    $SDK_PLATFORM: $SDK_PLATFORM_IOS,
-                    $DSA_PRIORITY: $DSA_PRIORITY_NO_PRIORITY,
-                    $DSA_STATUS: $DSA_STATUS_TRIAGE,
-                    $DSA_REPO_TICKET_URL: $url
+                    $sdk_platform_group: $sdk_platform_group_mobile,
+                    $sdk_platform: $sdk_platform_ios,
+                    $dsa_priority: $dsa_priority_no_priority,
+                    $dsa_status: $dsa_status_triage,
+                    $dsa_repo_ticket_url: $url
                   },
                   "name": $title,
-                  "workspace": $WORKSPACE_ID,
-                  "projects": [$PROJECT_ID_GITHUB_AND_IMPORTANT_SDK_ISSUES, $PROJECT_ID_SDK_BACKLOG],
+                  "workspace": $workspace_id,
+                  "projects": [$project_id_github_and_important_sdk_issues, $project_id_sdk_backlog],
                   "notes": "Issue ID: \($id)\nIssue number: \($number)\nCreated via GitHub Actions\n----\n\n\($body)"
                 }
               }')
@@ -68,6 +76,8 @@ jobs:
             TASK_GID=$(jq -r '.data.gid' response.json)
             echo "TASK_GID=$TASK_GID" >> $GITHUB_ENV
         - name: Move to "0 Unclassified" section in "Github & Important SDK Issues" project
+          env:
+            SECTION_ID_GITHUB_AND_IMPORTANT_SDK_ISSUES: "1208970755434051"
           run: |
               DATA_BODY=$(jq -n \
                 --arg task_gid "$TASK_GID" \
@@ -80,16 +90,18 @@ jobs:
                 }')
 
               curl --request POST \
-              --url https://app.asana.com/api/1.0/sections/$SECTION_ID_GITHUB_AND_IMPORTANT_SDK_ISSUES/addTask \
+              --url https://app.asana.com/api/1.0/sections/$section_id/addTask \
               --header 'accept: application/json' \
               --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
               --header 'content-type: application/json' \
               --data "$DATA_BODY"
         - name: Move to "Untriaged" section in "SDK / Backlog" project
+          env:
+            SECTION_ID_SDK_BACKLOG: "1208899729378982"
           run: |
               DATA_BODY=$(jq -n \
                 --arg task_gid "$TASK_GID" \
-                --arg section_id "$SECTION_ID_GITHUB_AND_IMPORTANT_SDK_ISSUES" \
+                --arg section_id "$SECTION_ID_SDK_BACKLOG" \
                 '{
                   "data": {
                     "task": $task_gid,
@@ -98,7 +110,7 @@ jobs:
                 }')
 
               curl --request POST \
-              --url https://app.asana.com/api/1.0/sections/$SECTION_ID_SDK_BACKLOG/addTask \
+              --url https://app.asana.com/api/1.0/sections/$section_id/addTask \
               --header 'accept: application/json' \
               --header 'authorization: Bearer ${{ secrets.ASANA_PAT }}' \
               --header 'content-type: application/json' \
