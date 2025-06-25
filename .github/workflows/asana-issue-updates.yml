@@ -1,4 +1,4 @@
-name: Github / Asana Issue Updates Workflow
+name: Github --> Asana Issue Updates Workflow
 
 on:
   issues:

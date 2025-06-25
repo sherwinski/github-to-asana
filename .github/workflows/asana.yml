@@ -1,4 +1,4 @@
-name: Github / Asana Workflow
+name: Github --> Asana Create Task Workflow
 
 on:
   issues:

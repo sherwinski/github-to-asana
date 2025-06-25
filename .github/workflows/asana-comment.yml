@@ -1,4 +1,4 @@
-name: Github / Asana Workflow
+name: Github --> Asana Add Comment Workflow
 
 on:
   issue_comment:
